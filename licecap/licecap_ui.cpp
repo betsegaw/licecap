@@ -215,8 +215,13 @@ void DoMouseCursor(LICE_IBitmap* sbm, HWND h, int xoffs, int yoffs)
       ICONINFO inf={0,};
       GetIconInfo(ci.hCursor,&inf);
 
-      int mousex = ci.ptScreenPos.x+xoffs;
-      int mousey = ci.ptScreenPos.y+yoffs;
+	  POINT curPos;
+	  curPos.x = ci.ptScreenPos.x;
+	  curPos.y = ci.ptScreenPos.y;
+	  LogicalToPhysicalPointForPerMonitorDPI(g_hwnd, &curPos);
+
+      int mousex = curPos.x+xoffs;
+      int mousey = curPos.y+yoffs;
 
       if ((g_prefs&4) && ((GetAsyncKeyState(VK_LBUTTON)&0x8000) || (GetAsyncKeyState(VK_RBUTTON)&0x8000)))
       {
