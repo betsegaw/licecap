@@ -457,8 +457,16 @@ static void GetViewRectSize(int *w, int *h)
 {
   RECT r={0,0,320,240};
   GetWindowRect(GetDlgItem(g_hwnd,IDC_VIEWRECT),&r);
-  if (w) *w=r.right-r.left - 2;
-  if (h) *h=abs(r.bottom-r.top) - 2;
+
+  POINT wndLoc;
+  wndLoc.x = r.left;
+  wndLoc.y = r.top;
+  LogicalToPhysicalPointForPerMonitorDPI(g_hwnd, &wndLoc);
+
+  float sf = (float)wndLoc.x / (float)r.left;
+
+  if (w) *w=(r.right-r.left - 2) * sf;
+  if (h) *h=(abs(r.bottom-r.top) - 2) * sf;
 }
 
 void UpdateDimBoxes(HWND hwndDlg)
@@ -1162,9 +1170,17 @@ static WDL_DLGRET liceCapMainProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
             {
               RECT r;
               GetWindowRect(GetDlgItem(hwndDlg,IDC_VIEWRECT),&r);
-              int bw = g_cap_bm->getWidth();
-              int bh = g_cap_bm->getHeight();
-              
+			  int bw = g_cap_bm->getWidth();
+			  int bh = g_cap_bm->getHeight();
+			  
+			  POINT wndLoc;
+			  wndLoc.x = r.left;
+			  wndLoc.y = r.top;
+			  LogicalToPhysicalPointForPerMonitorDPI(g_hwnd, &wndLoc);
+
+			  r.left = wndLoc.x;
+			  r.top = wndLoc.y;
+
               LICE_Clear(g_cap_bm,0);
               BitBlt(g_cap_bm->getDC(),0,0,bw,bh,hdc,r.left+1,r.top+1,SRCCOPY);
               ReleaseDC(h,hdc);
